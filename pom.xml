@@ -1,0 +1,137 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.proginnova</groupId>
+	<artifactId>pentaho.gdrive</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>pentaho.gdrive</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<kettle-version>7.1-SNAPSHOT</kettle-version>
+		<google.api-version>1.22.0</google.api-version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>pentaho-kettle</groupId>
+			<artifactId>kettle-core</artifactId>
+			<version>${kettle-version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>pentaho-kettle</groupId>
+			<artifactId>kettle-engine</artifactId>
+			<version>${kettle-version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>pentaho-kettle</groupId>
+			<artifactId>kettle-ui-swt</artifactId>
+			<version>${kettle-version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>${google.api-version}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-oauth2 -->
+		<dependency>
+		    <groupId>com.google.apis</groupId>
+		    <artifactId>google-api-services-oauth2</artifactId>
+		    <version>v2-rev124-1.22.0</version>
+		</dependency>
+		
+		<dependency>
+	      <groupId>com.google.apis</groupId>
+	      <artifactId>google-api-services-drive</artifactId>
+	      <version>v3-rev52-1.22.0</version>
+	    </dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>pentaho-releases</id>
+			<url>http://repository.pentaho.org/artifactory/repo/</url>
+		</repository>
+	</repositories>
+	
+	<build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <resources>
+            <resource>
+                <filtering>false</filtering>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>*.png</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptors>
+                        <descriptor>src/main/assembly/pdi-plugin.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>target/${project.build.finalName}.zip</file>
+                                    <type>zip</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <localCheckout>true</localCheckout>
+                    <tagNameFormat>@{project.version}</tagNameFormat>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+  
+</project>
