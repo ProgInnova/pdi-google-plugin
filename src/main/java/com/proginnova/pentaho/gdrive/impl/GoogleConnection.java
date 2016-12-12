@@ -33,6 +33,9 @@ public class GoogleConnection {
 		this.scopes = scopes;
 	}
 	
+	
+	// https://developers.google.com/admin-sdk/directory/v1/guides/delegation#create_the_service_account_and_its_credentials
+	// Only for Non gmail domain accounts
 	public GoogleConnection(String credentialFile, String serviceEmail, String impersonateAccount, Collection<String> scopes) throws Exception{
 		credential = authorize(credentialFile, serviceEmail, impersonateAccount ,scopes);
 		if(credential == null){

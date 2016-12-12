@@ -10,6 +10,7 @@ import javax.naming.LimitExceededException;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.Drive.Files;
 import com.google.api.services.drive.Drive.Permissions;
+import com.google.api.services.drive.Drive.Permissions.Create;
 import com.google.api.services.drive.model.About;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
@@ -19,13 +20,13 @@ import com.google.api.services.drive.model.User;
 @SuppressWarnings("unused")
 public class DriveFileManagement {
 	
-	public static String FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
+	private static String FILE_SET_FIELDS_PARAMETER = "nextPageToken, files(id, name, parents, mimeType, quotaBytesUsed, owners)";
 	
 	// https://developers.google.com/drive/v3/web/migration
 	
 	public static File copyFiles(Drive service, String originFile, String parentFolder, String copyFileName) throws IOException, LimitExceededException{
 		About accountData = service.about().get().setFields("storageQuota").execute();
-		File fileToCopy = getFile(service, originFile);
+		File fileToCopy = getFile(service, originFile, false);
 		if(fileToCopy != null && fileToCopy.getQuotaBytesUsed() + accountData.getStorageQuota().getUsage() <= accountData.getStorageQuota().getLimit() ){
 			File file = new File();
 			file.setName(copyFileName);
@@ -43,7 +44,6 @@ public class DriveFileManagement {
 					service.permissions().update(copiedFile.getId(), permission.getId(), newPermission).setFields("role").setTransferOwnership(true).execute();
 				}
 			}
-			
 			return copiedFile;
 		}else if(fileToCopy != null){
 			throw new LimitExceededException("Quota exceeded in this account");
@@ -54,17 +54,17 @@ public class DriveFileManagement {
 	
 	
 	public static File createOrGetFolder(Drive service, String folderName, String folderDestiny) throws IOException{
-		File parentFolder = getFile(service, FOLDER_MIME_TYPE, folderDestiny);
+		File parentFolder = getFile(service, DriveFileMimeTypes.FOLDER_MIME_TYPE, folderDestiny);
 		if(parentFolder == null){
 			throw new IOException(String.format("Folder %s not found", folderDestiny));
 		}
-		File folder = getFile(service, FOLDER_MIME_TYPE, folderName);
+		File folder = getFile(service, DriveFileMimeTypes.FOLDER_MIME_TYPE, folderName);
 		if(folder != null){
 			return folder;
 		}else{
 			folder = new File();
 			folder.setName(folderName);
-			folder.setMimeType(FOLDER_MIME_TYPE);
+			folder.setMimeType(DriveFileMimeTypes.FOLDER_MIME_TYPE);
 			List<String> parents = new LinkedList<>();
 			parents.add(parentFolder.getId());
 			folder.setParents(parents);
@@ -84,29 +84,33 @@ public class DriveFileManagement {
 		}
 	}
 	
-	public static File getFile(Drive service, String fileName) throws IOException{
+	public static File getFile(Drive service, String file, boolean fileIsId) throws IOException{
 		String pageToken = null;
 		FileList request = null;
-		do{
-			request = service.files().list().setQ(String.format("trashed=false and name='%s'", fileName)).setPageToken(pageToken).setFields("nextPageToken, files(id, name, parents, mimeType, quotaBytesUsed, owners)").execute();
-			for(File file: request.getFiles()){
-				if(file.getName().equals(fileName)){
-					return file;
+		if(!fileIsId){
+			do{
+				request = service.files().list().setQ(String.format("trashed=false and name='%s'", file)).setPageToken(pageToken).setFields(FILE_SET_FIELDS_PARAMETER).execute();
+				for(File fileIt: request.getFiles()){
+					if(fileIt.getName().equals(file)){
+						return fileIt;
+					}
 				}
-			}
-			pageToken = request.getNextPageToken();
-		}while(pageToken != null);
+				pageToken = request.getNextPageToken();
+			}while(pageToken != null);
+		}else{
+			return service.files().get(file).setFields(FILE_SET_FIELDS_PARAMETER).execute();
+		}
 		return null;
 	}
 	
-	public static File getFile(Drive service, String mimeType, String fileName) throws IOException{
+	public static File getFile(Drive service, String mimeType, String file) throws IOException{
 		String pageToken = null;
 		FileList request = null;
 		do{
-			request = service.files().list().setQ(String.format("mimeType='%s' and trashed=false and name='%s'", mimeType, fileName)).setPageToken(pageToken).setFields("nextPageToken, files(id, name, parents, quotaBytesUsed, owners)").execute();
-			for(File file: request.getFiles()){
-				if(file.getName().equals(fileName)){
-					return file;
+			request = service.files().list().setQ(String.format("mimeType='%s' and trashed=false and name='%s'", mimeType, file)).setPageToken(pageToken).setFields(FILE_SET_FIELDS_PARAMETER).execute();
+			for(File fileIt: request.getFiles()){
+				if(fileIt.getName().equals(file)){
+					return fileIt;
 				}
 			}
 			pageToken = request.getNextPageToken();
@@ -118,7 +122,7 @@ public class DriveFileManagement {
 		String pageToken = null;
 		FileList request = null;
 		do{
-			request = service.files().list().setQ(String.format("trashed=false and name='%s' and '%s' in parents", fileName, parent)).setPageToken(pageToken).setFields("nextPageToken, files(id, name, parents, mimeType, quotaBytesUsed, owners)").execute();
+			request = service.files().list().setQ(String.format("trashed=false and name='%s' and '%s' in parents", fileName, parent)).setPageToken(pageToken).setFields(FILE_SET_FIELDS_PARAMETER).execute();
 			for(File file: request.getFiles()){
 				if(file.getName().equals(fileName)){
 					return file;
@@ -133,7 +137,7 @@ public class DriveFileManagement {
 		String pageToken = null;
 		FileList request = null;
 		do{
-			request = service.files().list().setQ(String.format("mimeType='%s' and trashed=false and name='%s' and '%s' in parents", mimeType, fileName, parent)).setPageToken(pageToken).setFields("nextPageToken, files(id, name, parents, quotaBytesUsed, owners)").execute();
+			request = service.files().list().setQ(String.format("mimeType='%s' and trashed=false and name='%s' and '%s' in parents", mimeType, fileName, parent)).setPageToken(pageToken).setFields(FILE_SET_FIELDS_PARAMETER).execute();
 			for(File file: request.getFiles()){
 				if(file.getName().equals(fileName)){
 					return file;
@@ -144,19 +148,33 @@ public class DriveFileManagement {
 		return null;
 	}
 	
+	public static boolean addUserPermission(Drive service, File driveFile, String emailAccount, DriveRolePermission rolePermission) throws IOException{
+		Permission permission = new Permission();
+		permission.setEmailAddress(emailAccount);
+		permission.setRole(rolePermission.toString());
+		permission.setType("user");
+		Create buildRequest = service.permissions().create(driveFile.getId(), permission).setFields("id, role");
+		if(rolePermission.equals(DriveRolePermission.owner)){
+			buildRequest.setTransferOwnership(true);
+		}
+		Permission createdPermission = buildRequest.execute();
+		System.out.println(createdPermission);
+		return createdPermission.getId() != null && createdPermission.getRole().equals(rolePermission.toString());
+	}
+	
 	public static boolean existsFile(Drive service, String mimeType, String fileName) throws IOException{
 		return getFile(service, mimeType, fileName) != null;
 	}
 	
 	public static boolean existsFile(Drive service, String fileName) throws IOException{
-		return getFile(service, fileName) != null;
+		return getFile(service, fileName, false) != null;
 	}
 	
 	public static boolean deleteAllFoldersInFolder(Drive service, String folderParent) throws IOException{
 		String pageToken = null;
 		FileList request = null;
 		do{
-			request = service.files().list().setQ(String.format("mimeType='%s' and '%s' in parents", FOLDER_MIME_TYPE, folderParent)).setPageToken(pageToken).setFields("nextPageToken, files(id, name, parents, quotaBytesUsed, owners)").execute();
+			request = service.files().list().setQ(String.format("mimeType='%s' and '%s' in parents", DriveFileMimeTypes.FOLDER_MIME_TYPE, folderParent)).setPageToken(pageToken).setFields(FILE_SET_FIELDS_PARAMETER).execute();
 			System.out.println(request.getFiles());
 			for(File file: request.getFiles()){
 				service.files().delete(file.getId()).execute();
