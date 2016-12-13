@@ -162,6 +162,34 @@ public class DriveFileManagement {
 		return createdPermission.getId() != null && createdPermission.getRole().equals(rolePermission.toString());
 	}
 	
+	public static boolean addUserPermission(Drive service, File driveFile, String emailAccount, DriveRolePermission rolePermission, boolean notifyByEmail) throws IOException{
+		Permission permission = new Permission();
+		permission.setEmailAddress(emailAccount);
+		permission.setRole(rolePermission.toString());
+		permission.setType("user");
+		Create buildRequest = service.permissions().create(driveFile.getId(), permission).setFields("id, role").setSendNotificationEmail(notifyByEmail);
+		if(rolePermission.equals(DriveRolePermission.owner)){
+			buildRequest.setTransferOwnership(true);
+		}
+		Permission createdPermission = buildRequest.execute();
+		System.out.println(createdPermission);
+		return createdPermission.getId() != null && createdPermission.getRole().equals(rolePermission.toString());
+	}
+	
+	public static boolean addUserPermission(Drive service, File driveFile, String emailAccount, DriveRolePermission rolePermission, String emailMessage) throws IOException{
+		Permission permission = new Permission();
+		permission.setEmailAddress(emailAccount);
+		permission.setRole(rolePermission.toString());
+		permission.setType("user");
+		Create buildRequest = service.permissions().create(driveFile.getId(), permission).setFields("id, role").setEmailMessage(emailMessage);
+		if(rolePermission.equals(DriveRolePermission.owner)){
+			buildRequest.setTransferOwnership(true);
+		}
+		Permission createdPermission = buildRequest.execute();
+		System.out.println(createdPermission);
+		return createdPermission.getId() != null && createdPermission.getRole().equals(rolePermission.toString());
+	}
+	
 	public static boolean existsFile(Drive service, String mimeType, String fileName) throws IOException{
 		return getFile(service, mimeType, fileName) != null;
 	}
