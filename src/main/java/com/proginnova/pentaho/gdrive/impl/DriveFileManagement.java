@@ -20,24 +20,105 @@ import com.google.api.services.drive.model.User;
 @SuppressWarnings("unused")
 public class DriveFileManagement {
 	
-	private static String FILE_SET_FIELDS_PARAMETER = "nextPageToken, files(id, name, parents, mimeType, quotaBytesUsed, owners)";
+	private static String FILE_SET_FIELDS_PARAMETER = "nextPageToken, files(id, name, parents, mimeType, quotaBytesUsed, owners, permissions)";
 	
 	// https://developers.google.com/drive/v3/web/migration
 	
-	public static File copyFiles(Drive service, String originFile, String parentFolder, String copyFileName) throws IOException, LimitExceededException{
+	public static File copyFiles(Drive service, String originFile, String parentFolderId, String copyFileName) throws IOException, LimitExceededException{
 		About accountData = service.about().get().setFields("storageQuota").execute();
 		File fileToCopy = getFile(service, originFile, false);
 		if(fileToCopy != null && fileToCopy.getQuotaBytesUsed() + accountData.getStorageQuota().getUsage() <= accountData.getStorageQuota().getLimit() ){
 			File file = new File();
 			file.setName(copyFileName);
 			List<String> parents = new LinkedList<>();
-			parents.add(parentFolder);
+			parents.add(parentFolderId);
 			file.setParents(parents);
 			File copiedFile = service.files().copy(fileToCopy.getId(), file).setFields("id, owners, permissions").execute();
 			
 			User owner = fileToCopy.getOwners().get(0);
 			for(Permission permission:copiedFile.getPermissions()){
-				if(permission.getEmailAddress().equals(owner.getEmailAddress())){
+				if(permission.getEmailAddress().equals(owner.getEmailAddress()) && !permission.getRole().equals(DriveRolePermission.owner.toString()) ){
+					Permission newPermission = new Permission();
+					newPermission.setId(permission.getId());
+					newPermission.setRole("owner");
+					service.permissions().update(copiedFile.getId(), permission.getId(), newPermission).setFields("role").setTransferOwnership(true).execute();
+				}
+			}
+			return copiedFile;
+		}else if(fileToCopy != null){
+			throw new LimitExceededException("Quota exceeded in this account");
+		}else{
+			throw new IOException("File to copy not found");
+		}
+	}
+	
+	public static File copyFiles(Drive service, File originFile, String parentFolderId, String copyFileName) throws IOException, LimitExceededException{
+		About accountData = service.about().get().setFields("storageQuota").execute();
+		if(originFile != null && originFile.getQuotaBytesUsed() + accountData.getStorageQuota().getUsage() <= accountData.getStorageQuota().getLimit() ){
+			File file = new File();
+			file.setName(copyFileName);
+			List<String> parents = new LinkedList<>();
+			parents.add(parentFolderId);
+			file.setParents(parents);
+			File copiedFile = service.files().copy(originFile.getId(), file).setFields("id, owners, permissions").execute();
+			
+			User owner = originFile.getOwners().get(0);
+			for(Permission permission:copiedFile.getPermissions()){
+				if(permission.getEmailAddress().equals(owner.getEmailAddress()) && !permission.getRole().equals(DriveRolePermission.owner.toString()) ){
+					Permission newPermission = new Permission();
+					newPermission.setId(permission.getId());
+					newPermission.setRole("owner");
+					service.permissions().update(copiedFile.getId(), permission.getId(), newPermission).setFields("role").setTransferOwnership(true).execute();
+				}
+			}
+			return copiedFile;
+		}else if(originFile != null){
+			throw new LimitExceededException("Quota exceeded in this account");
+		}else{
+			throw new IOException("File to copy not found");
+		}
+	}
+	
+	public static File copyFiles(Drive service, File originFile, File parentFolder, String copyFileName) throws IOException, LimitExceededException{
+		About accountData = service.about().get().setFields("storageQuota").execute();
+		if(originFile != null && originFile.getQuotaBytesUsed() + accountData.getStorageQuota().getUsage() <= accountData.getStorageQuota().getLimit() ){
+			File file = new File();
+			file.setName(copyFileName);
+			List<String> parents = new LinkedList<>();
+			parents.add(parentFolder.getId());
+			file.setParents(parents);
+			File copiedFile = service.files().copy(originFile.getId(), file).setFields("id, owners, permissions").execute();
+			
+			User owner = originFile.getOwners().get(0);
+			for(Permission permission:copiedFile.getPermissions()){
+				if(permission.getEmailAddress().equals(owner.getEmailAddress()) && !permission.getRole().equals(DriveRolePermission.owner.toString()) ){
+					Permission newPermission = new Permission();
+					newPermission.setId(permission.getId());
+					newPermission.setRole("owner");
+					service.permissions().update(copiedFile.getId(), permission.getId(), newPermission).setFields("role").setTransferOwnership(true).execute();
+				}
+			}
+			return copiedFile;
+		}else if(originFile != null){
+			throw new LimitExceededException("Quota exceeded in this account");
+		}else{
+			throw new IOException("File to copy not found");
+		}
+	}
+	
+	public static File copyFilesWithId(Drive service, String originFileId, String parentFolderId, String copyFileName) throws IOException, LimitExceededException{
+		About accountData = service.about().get().setFields("storageQuota").execute();
+		File fileToCopy = service.files().get(originFileId).setFields(FILE_SET_FIELDS_PARAMETER).execute();
+		if(fileToCopy != null && fileToCopy.getQuotaBytesUsed() + accountData.getStorageQuota().getUsage() <= accountData.getStorageQuota().getLimit() ){
+			File file = new File();
+			file.setName(copyFileName);
+			List<String> parents = new LinkedList<>();
+			parents.add(parentFolderId);
+			file.setParents(parents);
+			File copiedFile = service.files().copy(fileToCopy.getId(), file).setFields("id, owners, permissions").execute();
+			User owner = fileToCopy.getOwners().get(0);
+			for(Permission permission:copiedFile.getPermissions()){
+				if(permission.getEmailAddress().equals(owner.getEmailAddress()) && !permission.getRole().equals(DriveRolePermission.owner.toString()) ){
 					Permission newPermission = new Permission();
 					newPermission.setId(permission.getId());
 					newPermission.setRole("owner");
@@ -188,6 +269,23 @@ public class DriveFileManagement {
 		Permission createdPermission = buildRequest.execute();
 		System.out.println(createdPermission);
 		return createdPermission.getId() != null && createdPermission.getRole().equals(rolePermission.toString());
+	}
+	
+	public static boolean addAnyoneAccess(Drive service, File driveFile, DriveRolePermission role) throws IOException{
+		if(role.equals(DriveRolePermission.owner)){
+			throw new IllegalArgumentException("Can't be owner");
+		}
+		
+		for(Permission permission:driveFile.getPermissions()){
+			if(permission.getType().equals("anyone")){
+				return true;
+			}
+		}
+		Permission permission = new Permission();
+		permission.setType("anyone");
+		permission.setRole(role.toString());
+		service.permissions().create(driveFile.getId(), permission).setFields("id").setSendNotificationEmail(false).execute();
+		return true;
 	}
 	
 	public static boolean existsFile(Drive service, String mimeType, String fileName) throws IOException{
