@@ -3,16 +3,13 @@ package com.proginnova.pentaho.gdrive.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.auth.oauth2.TokenErrorResponse;
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
