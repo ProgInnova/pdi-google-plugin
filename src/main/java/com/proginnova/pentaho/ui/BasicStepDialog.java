@@ -13,6 +13,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.core.ResultFile;
@@ -93,6 +94,30 @@ public abstract class BasicStepDialog extends BaseStepDialog implements StepDial
 		return formData;
 	}
 	
+	protected FormData getBaseFormData(int numeratorTop, int topOffset, Control leftLastControl, int leftOffset, int numeratorRight, int rightOffset){
+		FormData formData = new FormData();
+		formData.top = new FormAttachment(numeratorTop, topOffset);
+		formData.left = new FormAttachment(leftLastControl, leftOffset);
+		formData.right = new FormAttachment(numeratorRight, rightOffset);
+		return formData;
+	}
+	
+	protected FormData getBaseFormData(int numeratorTop, int topOffset, Control leftLastControl, int leftOffset, Control rightLastControl, int rightOffset){
+		FormData formData = new FormData();
+		formData.top = new FormAttachment(numeratorTop, topOffset);
+		formData.left = new FormAttachment(leftLastControl, leftOffset);
+		formData.right = new FormAttachment(rightLastControl, rightOffset);
+		return formData;
+	}
+	
+	protected FormData getBaseFormData(int numeratorTop, int topOffset, int numeratorLeft, int leftOffset, Control rightLastControl, int rightOffset){
+		FormData formData = new FormData();
+		formData.top = new FormAttachment(numeratorTop, topOffset);
+		formData.left = new FormAttachment(numeratorLeft, leftOffset);
+		formData.right = new FormAttachment(rightLastControl, rightOffset);
+		return formData;
+	}
+	
 	protected FormData getBaseFormData(int numeratorTop, int topOffset, int numeratorLeft, int leftOffset, int numeratorRight, int rightOffset){
 		FormData formData = new FormData();
 		formData.top = new FormAttachment(numeratorTop, topOffset);
@@ -101,6 +126,54 @@ public abstract class BasicStepDialog extends BaseStepDialog implements StepDial
 		return formData;
 	}
 	
+	protected FormData getBaseFormDataLeftDirection(int numeratorTop, int topOffset, int numeratorLeft, int leftOffset){
+		FormData formData = new FormData();
+		formData.top = new FormAttachment(numeratorTop, topOffset);
+		formData.left = new FormAttachment(numeratorLeft, leftOffset);
+		return formData;
+	}
+	
+	protected FormData getBaseFormDataLeftDirection(Control topLastControl, int topOffset, int numeratorLeft, int leftOffset){
+		FormData formData = new FormData();
+		formData.top = new FormAttachment(topLastControl, topOffset);
+		formData.left = new FormAttachment(numeratorLeft, leftOffset);
+		return formData;
+	}
+	
+	protected FormData getBaseFormDataLeftDirection(Control topLastControl, int topOffset, Control leftLastControl, int leftOffset){
+		FormData formData = new FormData();
+		formData.top = new FormAttachment(topLastControl, topOffset);
+		formData.left = new FormAttachment(leftLastControl, leftOffset);
+		return formData;
+	}
+	
+	protected FormData getBaseFormDataRightDirection(int numeratorTop, int topOffset, int numeratorRight, int rightOffset){
+		FormData formData = new FormData();
+		formData.top = new FormAttachment(numeratorTop, topOffset);
+		formData.right = new FormAttachment(numeratorRight, rightOffset);
+		return formData;
+	}
+	
+	protected FormData getBaseFormDataRightDirection(Control topLastControl, int topOffset, int numeratorRight, int rightOffset){
+		FormData formData = new FormData();
+		formData.top = new FormAttachment(topLastControl, topOffset);
+		formData.right = new FormAttachment(numeratorRight, rightOffset);
+		return formData;
+	}
+	
+	protected FormData getBaseFormDataRightDirection(Control topLastControl, int topOffset, Control rightLastControl, int rightOffset){
+		FormData formData = new FormData();
+		formData.top = new FormAttachment(topLastControl, topOffset);
+		formData.right = new FormAttachment(rightLastControl, rightOffset);
+		return formData;
+	}
+	
+	protected FormLayout getFormLayout(int symetricmargin){
+		FormLayout formLayout = new FormLayout();
+		formLayout.marginWidth = symetricmargin;
+        formLayout.marginHeight = symetricmargin;
+        return formLayout;
+	}
 	
 	protected FormLayout getFormLayout(int marginWidth, int marginHeight){
 		FormLayout formLayout = new FormLayout();
@@ -114,6 +187,12 @@ public abstract class BasicStepDialog extends BaseStepDialog implements StepDial
 		//btn.addListener(arg0, arg1);(listener);
 		btn.setText(label);
 		return btn;
+	}
+	
+	protected Label createLabel(Composite composite, String labelTxt){
+		Label label = new Label(composite, SWT.RIGHT);
+		label.setText(labelTxt);
+		return label;
 	}
 	
 	protected abstract ShellAdapter getShellAdapter();
