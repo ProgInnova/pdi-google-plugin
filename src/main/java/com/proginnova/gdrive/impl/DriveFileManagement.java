@@ -1,4 +1,4 @@
-package com.proginnova.pentaho.gdrive.impl;
+package com.proginnova.gdrive.impl;
 
 
 import java.io.IOException;

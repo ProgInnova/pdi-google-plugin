@@ -1,40 +1,22 @@
 package com.proginnova.pentaho.ui;
 
-import java.util.List;
-import java.util.Map;
-
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.pentaho.di.core.ResultFile;
-import org.pentaho.di.core.RowSet;
-import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.core.exception.KettleStepException;
-import org.pentaho.di.core.exception.KettleValueException;
-import org.pentaho.di.core.logging.LogChannelInterface;
-import org.pentaho.di.core.row.RowMetaInterface;
-import org.pentaho.di.core.variables.VariableSpace;
-import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.step.BaseStepData.StepExecutionStatus;
 import org.pentaho.di.trans.step.BaseStepMeta;
-import org.pentaho.di.trans.step.RowListener;
-import org.pentaho.di.trans.step.StepDataInterface;
 import org.pentaho.di.trans.step.StepDialogInterface;
-import org.pentaho.di.trans.step.StepInterface;
-import org.pentaho.di.trans.step.StepListener;
-import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
 public abstract class BasicStepDialog extends BaseStepDialog implements StepDialogInterface {
@@ -186,13 +168,28 @@ public abstract class BasicStepDialog extends BaseStepDialog implements StepDial
 		Button btn = new Button(composite, SWT.PUSH | SWT.CENTER);
 		//btn.addListener(arg0, arg1);(listener);
 		btn.setText(label);
+		props.setLook(btn);
 		return btn;
 	}
 	
 	protected Label createLabel(Composite composite, String labelTxt){
 		Label label = new Label(composite, SWT.RIGHT);
 		label.setText(labelTxt);
+		props.setLook(label);
 		return label;
+	}
+	
+	protected Group createGroup(Composite composite, String label){
+		Group group = new Group(composite, SWT.SHADOW_NONE);
+		group.setText(label);
+		props.setLook(group);
+		return group;
+	}
+	
+	protected CCombo createFieldsCombo(Composite composite){
+		CCombo ccombo = new CCombo(composite, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+        props.setLook(ccombo);
+        return ccombo;
 	}
 	
 	protected abstract ShellAdapter getShellAdapter();

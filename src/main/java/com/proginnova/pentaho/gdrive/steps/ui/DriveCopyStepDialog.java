@@ -43,6 +43,7 @@ import org.pentaho.di.trans.step.StepDialogInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.di.ui.core.widget.LabelText;
+import org.pentaho.di.ui.core.widget.StyledTextComp;
 import org.pentaho.di.ui.core.widget.TextVar;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 
@@ -100,10 +101,11 @@ public class DriveCopyStepDialog extends BasicStepDialog {
 		int margin = Const.MARGIN;
 		int middle = props.getMiddlePct();
 		
+		int btnTopMargin = (System.getProperty("os.name").toLowerCase().contains("mac"))? 0:margin;
+		
 		// Step Name
 		
-		wlStepname = createLabel(shell, BaseMessages.getString(PKG, "DriveCopyStepDialog.stepName.label"));
-        props.setLook(wlStepname);
+		wlStepname = createLabel(shell, BaseMessages.getString(PKG, "DriveCopyStepDialog.stepName.label") );
         fdlStepname = getBaseFormData(null, margin, middle, true);
         wlStepname.setLayoutData(fdlStepname);
         
@@ -116,33 +118,28 @@ public class DriveCopyStepDialog extends BasicStepDialog {
         
         // Title by field
         
-        Label lblTitleByField = createLabel(shell, BaseMessages.getString(PKG, "DriveCopyStepDialog.titleFieldInput.label"));
+        Label lblTitleByField = createLabel(shell, BaseMessages.getString(PKG, "DriveCopyStepDialog.titleFieldInput.label") );
         lblTitleByField.setLayoutData(getBaseFormData(wStepname, margin, middle, true));
-        props.setLook(lblTitleByField);
         
-        CCombo titleFieldSelect = new CCombo(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        props.setLook(titleFieldSelect);
-        titleFieldSelect.setLayoutData(getBaseFormData(wStepname, margin, middle, false));
+        CCombo titleFieldSelect = createFieldsCombo(shell);
+        titleFieldSelect.setLayoutData( getBaseFormData(wStepname, margin, middle, false) );
         
         // Output field
         
-        Label lblOutputField = createLabel(shell, BaseMessages.getString(PKG, "DriveCopyStepDialog.outputFieldInput.label"));
-        lblOutputField.setLayoutData(getBaseFormData(titleFieldSelect, margin, middle, true));
-        props.setLook(lblOutputField);
+        Label lblOutputField = createLabel(shell, BaseMessages.getString(PKG, "DriveCopyStepDialog.outputFieldInput.label") );
+        lblOutputField.setLayoutData( getBaseFormData(titleFieldSelect, margin, middle, true) );
         
         Text txtOutputField = new Text(shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        txtOutputField.setLayoutData(getBaseFormData(titleFieldSelect, margin, middle, false));
+        txtOutputField.setLayoutData( getBaseFormData(titleFieldSelect, margin, middle, false) );
         props.setLook(txtOutputField);
         
         // Tabs
         
         CTabFolder folderTabs = new CTabFolder(shell, SWT.BORDER);
         props.setLook(folderTabs, Props.WIDGET_STYLE_TAB);
-        //folderTabs.setSimple(true);
-        
         
         CTabItem googleConfigTab = new CTabItem(folderTabs, SWT.NONE);
-        googleConfigTab.setText(BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.label"));
+        googleConfigTab.setText( BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.label") );
         
         
         Composite googleConfigComposite = new Composite(folderTabs, SWT.NONE);
@@ -151,12 +148,10 @@ public class DriveCopyStepDialog extends BasicStepDialog {
         
         // Service Account Config Group
         
-        Group serviceAccountGroup = new Group(googleConfigComposite, SWT.SHADOW_NONE);
-        serviceAccountGroup.setText( BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.serviceAccountGroup.label") );
-        props.setLook(serviceAccountGroup);
+        Group serviceAccountGroup = createGroup(googleConfigComposite, BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.serviceAccountGroup.label") );
         serviceAccountGroup.setLayout( getFormLayout(10) );
         
-        Label lblsvAccountEmail = createLabel(serviceAccountGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.serviceAccountGroup.emailLabel"));
+        Label lblsvAccountEmail = createLabel(serviceAccountGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.serviceAccountGroup.emailLabel") );
         lblsvAccountEmail.setLayoutData( getBaseFormData(0, 2 * margin, 0, 0, middle, -margin) );
         props.setLook(lblsvAccountEmail);
         
@@ -166,37 +161,30 @@ public class DriveCopyStepDialog extends BasicStepDialog {
         
         Label lblSvAccountKeyfile = createLabel(serviceAccountGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.serviceAccountGroup.keyFileLabel"));
         props.setLook(lblSvAccountKeyfile);
-        lblSvAccountKeyfile.setLayoutData(getBaseFormData(txtSvAccountEmail, margin, 0, 0, middle, -margin));
-        
-        
+        lblSvAccountKeyfile.setLayoutData( getBaseFormData(txtSvAccountEmail, margin, 0, 0, middle, -margin) );
         
         TextVar txtSvKeyFile = new TextVar(transMeta, serviceAccountGroup, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
         props.setLook(txtSvKeyFile);
-        txtSvKeyFile.setLayoutData(getBaseFormData(txtSvAccountEmail, margin, lblSvAccountKeyfile, margin, 90, -margin));
+        txtSvKeyFile.setLayoutData( getBaseFormData(txtSvAccountEmail, margin, lblSvAccountKeyfile, margin, 90, -margin) );
         
         Button btnSvKeyFileBrowse = createButton(serviceAccountGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.dialog.browse"), null);
         btnSvKeyFileBrowse.setToolTipText( BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.serviceAccountGroup.keyFileBrowseTooltip") );
-        props.setLook(btnSvKeyFileBrowse);
-        btnSvKeyFileBrowse.setLayoutData(getBaseFormDataLeftDirection(txtSvAccountEmail, 0, txtSvKeyFile, margin));
+        btnSvKeyFileBrowse.setLayoutData( getBaseFormDataLeftDirection(txtSvAccountEmail, btnTopMargin, txtSvKeyFile, margin) );
         
         Button btnTestConnection = createButton(serviceAccountGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.serviceAccountGroup.testConnection"), null);
-        btnTestConnection.setLayoutData(getBaseFormDataLeftDirection(btnSvKeyFileBrowse, margin, middle, -margin));
+        btnTestConnection.setLayoutData( getBaseFormDataLeftDirection(btnSvKeyFileBrowse, margin, middle, -margin) );
         
         
         // File Config Group
         
-        Group fileConfigGroup = new Group(googleConfigComposite, SWT.SHADOW_NONE);
-        fileConfigGroup.setText(BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.fileConfigGroup.label"));
+        Group fileConfigGroup = createGroup(googleConfigComposite, BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.fileConfigGroup.label"));
         fileConfigGroup.setLayout(getFormLayout(10));
-        props.setLook(fileConfigGroup);
         
         Label lblFileCopy = createLabel(fileConfigGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.fileConfigGroup.fileCopyLabel"));
-        props.setLook(lblFileCopy);
         lblFileCopy.setLayoutData(getBaseFormData(0, margin, 0, 0, middle, -margin));
         
         Button btnFileCopyBrowse = createButton(fileConfigGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.dialog.browse2"), null);
-        props.setLook(btnFileCopyBrowse);
-        btnFileCopyBrowse.setLayoutData(getBaseFormDataRightDirection(0, 0, 100, 0));
+        btnFileCopyBrowse.setLayoutData(getBaseFormDataRightDirection(0, btnTopMargin, 100, 0));
         
         Text txtFileCopy = new Text(fileConfigGroup, SWT.SINGLE | SWT.LEFT | SWT.BORDER | SWT.READ_ONLY);
         props.setLook(txtFileCopy);
@@ -204,16 +192,15 @@ public class DriveCopyStepDialog extends BasicStepDialog {
         
         
         Label lblFolderCopy = createLabel(fileConfigGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.fileConfigGroup.folderDumpLabel"));
-        props.setLook(lblFolderCopy);
-        lblFolderCopy.setLayoutData(getBaseFormData(txtFileCopy, margin, 0, 0, middle, -margin));
+        lblFolderCopy.setLayoutData( getBaseFormData(txtFileCopy, margin, 0, 0, middle, -margin) );
         
         Button btnFolderCopyBrowse = createButton(fileConfigGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.dialog.browse3"), null);
         props.setLook(btnFolderCopyBrowse);
-        btnFolderCopyBrowse.setLayoutData(getBaseFormDataRightDirection(txtFileCopy, 0, 100, 0));
+        btnFolderCopyBrowse.setLayoutData( getBaseFormDataRightDirection(txtFileCopy, btnTopMargin, 100, 0) );
         
         Text txtFolderDump = new Text(fileConfigGroup, SWT.SINGLE | SWT.LEFT | SWT.BORDER | SWT.READ_ONLY);
         props.setLook(txtFolderDump);
-        txtFolderDump.setLayoutData(getBaseFormData(txtFileCopy, margin, lblFolderCopy, margin, btnFolderCopyBrowse, -margin));
+        txtFolderDump.setLayoutData( getBaseFormData(txtFileCopy, margin, lblFolderCopy, margin, btnFolderCopyBrowse, -margin) );
         
         Label lblFileInfo = new Label(fileConfigGroup, SWT.BOLD | SWT.CENTER);
         lblFileInfo.setText( BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.fileConfigGroup.fileInfoLabel") );
@@ -228,24 +215,21 @@ public class DriveCopyStepDialog extends BasicStepDialog {
         
         // Impersonate Config Group
         
-        Group impersonateGroup = new Group(googleConfigComposite, SWT.SHADOW_OUT);
-        impersonateGroup.setText( BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.impersonateUserGroup.text"));
+        Group impersonateGroup = createGroup(googleConfigComposite, BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.impersonateUserGroup.text"));
         impersonateGroup.setLayout( getFormLayout(10) );
-        props.setLook(impersonateGroup);
         
         Label lblImpersonateUser = createLabel(impersonateGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.impersonateUserGroup.impersonateUserLabel") );
-        lblImpersonateUser.setLayoutData(getBaseFormData(0, margin, 0, 0, middle, -margin));
-        props.setLook(lblImpersonateUser);
+        lblImpersonateUser.setLayoutData( getBaseFormData(0, margin, 0, 0, middle, -margin) );
         
         TextVar txtImpersonateUser = new TextVar(transMeta, impersonateGroup, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
         props.setLook(txtImpersonateUser);
         txtImpersonateUser.setLayoutData( getBaseFormData(0, margin, lblImpersonateUser, margin, 100, 0) );
         
         Link lblImpersonateUserInfo = new Link(impersonateGroup, SWT.BOLD | SWT.CENTER);
-        lblImpersonateUserInfo.setText(BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.impersonateUserGroup.info"));
+        lblImpersonateUserInfo.setText( BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.impersonateUserGroup.info") );
         props.setLook(lblImpersonateUserInfo);
         lblImpersonateUserInfo.setLayoutData( getBaseFormData(txtImpersonateUser, margin, 0, 0, 100, 0) );
-        lblImpersonateUserInfo.addSelectionListener(getLinkSelected());
+        lblImpersonateUserInfo.addSelectionListener( getLinkSelected() );
         
         
         // Permissions Tab
@@ -259,45 +243,106 @@ public class DriveCopyStepDialog extends BasicStepDialog {
         
         // Input Permission Group
         
-        Group inputPermissionGroup = new Group(permissionComposite, SWT.SHADOW_OUT);
-        props.setLook(inputPermissionGroup);
-        inputPermissionGroup.setText(BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.InputPermission.groupLabel"));
-        inputPermissionGroup.setLayout(getFormLayout(10));
+        Group inputPermissionGroup = createGroup(permissionComposite, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.InputPermission.groupLabel"));
+        inputPermissionGroup.setLayout( getFormLayout(10) );
         
-        Label lblCkPermission = createLabel(inputPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.InputPermission.cklabel"));
-        lblCkPermission.setLayoutData(getBaseFormData(0, margin, 0, 0, middle, -margin));
-        props.setLook(lblCkPermission);
+        Label lblCkPermissionInput = createLabel(inputPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.InputPermission.cklabel"));
+        lblCkPermissionInput.setLayoutData( getBaseFormData(0, margin, 0, 0, middle, -margin) );
         
         Button ckInputPermission = createCheckbox(inputPermissionGroup, null);
-        ckInputPermission.setLayoutData( getBaseFormData(0, margin, lblCkPermission, margin, 100, 0) );
-        props.setLook(ckInputPermission);
+        ckInputPermission.setLayoutData( getBaseFormData(0, margin, lblCkPermissionInput, margin, 100, 0) );
         
         Label lblAccountInput = createLabel(inputPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.InputPermission.accountInput.label"));
-        props.setLook(lblAccountInput);
         lblAccountInput.setLayoutData( getBaseFormData(ckInputPermission, margin, 0, 0, middle, -margin));
         
         TextVar txtAccountInput = new TextVar(transMeta, inputPermissionGroup, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
         props.setLook(txtAccountInput);
-        txtAccountInput.setLayoutData( getBaseFormData(ckInputPermission, margin, lblAccountInput, margin, 100, margin));
+        txtAccountInput.setLayoutData( getBaseFormData(ckInputPermission, margin, lblAccountInput, margin, middle + (100 - middle) / 2, margin));
         
         Label lblRoleInput = createLabel(inputPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.roleCombo.label"));
-        lblRoleInput.setLayoutData( getBaseFormData(txtAccountInput, margin, 0, 0, middle, -margin));
-        props.setLook(lblRoleInput);
+        lblRoleInput.setLayoutData( getBaseFormData(ckInputPermission, margin, 0, 0, middle + 2 * (100 - middle) / 3, -margin) );
         
-        CCombo comboRoleInput = new CCombo(inputPermissionGroup, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-        props.setLook(comboRoleInput);
-        comboRoleInput.setLayoutData( getBaseFormData(txtAccountInput, margin, lblRoleInput, margin, 100, margin));
-        
+        CCombo comboRoleInput = createRoleCombo(inputPermissionGroup);
+        comboRoleInput.setLayoutData( getBaseFormData(ckInputPermission, margin, lblRoleInput, margin, 100, margin));
         
         Label lblCkNotifyEmailInput = createLabel(inputPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.ckNotifyEmail.label"));
-        props.setLook(lblCkNotifyEmailInput);
-        lblCkNotifyEmailInput.setLayoutData( getBaseFormData(comboRoleInput, margin, 0, 0, middle, -margin));
+        lblCkNotifyEmailInput.setLayoutData( getBaseFormData(txtAccountInput, margin, 0, 0, middle, -margin));
         
         Button ckNotifyEmailInput = createCheckbox(inputPermissionGroup, null);
-        props.setLook(ckNotifyEmailInput);
-        ckNotifyEmailInput.setLayoutData( getBaseFormData(comboRoleInput, margin, lblCkNotifyEmailInput, margin, 100, 0));
+        ckNotifyEmailInput.setLayoutData( getBaseFormData(txtAccountInput, margin, lblCkNotifyEmailInput, margin, 100, 0));
         
+        Label lblCkCustomMessageInput = createLabel(inputPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.ckCustomMessage"));
+        lblCkCustomMessageInput.setLayoutData( getBaseFormData(ckNotifyEmailInput, margin, 0, 0, middle, -margin));
         
+        Button ckCustomMessageInput = createCheckbox(inputPermissionGroup, null);
+        ckCustomMessageInput.setLayoutData( getBaseFormData(ckNotifyEmailInput, margin, lblCkCustomMessageInput, margin, 100, 0));
+        
+        Label lblTxtCustomMessageInput = createLabel(inputPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.ckCustomMessage.label"));
+        lblTxtCustomMessageInput.setLayoutData(getBaseFormData(ckCustomMessageInput, margin, 0, 0, middle, -margin));
+        
+        StyledTextComp txtCustomMessage = new StyledTextComp(transMeta, inputPermissionGroup, SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL, "");
+        props.setLook(txtCustomMessage, Props.WIDGET_STYLE_FIXED);
+        FormData fdTxtCustomMessage = getBaseFormData(ckCustomMessageInput, margin, lblTxtCustomMessageInput, margin, 100, 0);
+        fdTxtCustomMessage.bottom = new FormAttachment(100, -margin);
+        txtCustomMessage.setLayoutData(fdTxtCustomMessage);
+        
+        // Field Permission Group
+        
+        Group fieldPermissionGroup = createGroup(permissionComposite, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.fieldPermission.groupLabel"));
+        fieldPermissionGroup.setLayout( getFormLayout(10) );
+        
+        Label lblCkPermissionField = createLabel(fieldPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.fieldPermission.label"));
+        lblCkPermissionField.setLayoutData( getBaseFormData(0, margin, 0, 0, middle, -margin) );
+        
+        Button ckPermissionField = createCheckbox(fieldPermissionGroup, null);
+        ckPermissionField.setLayoutData( getBaseFormData(0, margin, lblCkPermissionField, margin, 100, 0) );
+
+        Label lblPermissionFieldCombo = createLabel(fieldPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.fieldPermission.fieldCombo"));
+        lblPermissionFieldCombo.setLayoutData( getBaseFormData(ckPermissionField, margin, 0, 0, middle, -margin) );
+        
+        CCombo comboAccountField = createFieldsCombo(fieldPermissionGroup);
+        comboAccountField.setLayoutData( getBaseFormData(ckPermissionField, margin, lblPermissionFieldCombo, margin, middle + (100 - margin) / 3, margin));
+        
+        Label lblComboRoleField = createLabel(fieldPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.roleCombo.label"));
+        lblComboRoleField.setLayoutData( getBaseFormData(ckPermissionField, margin, 0, 0, middle + 2 * (100 -middle) / 3, -margin) );
+        
+        CCombo comboRoleField = createRoleCombo(fieldPermissionGroup);
+        comboRoleField.setLayoutData( getBaseFormData(ckPermissionField, margin, lblComboRoleField, margin, 100, margin));
+        
+        Label lblCkNotifyEmailField = createLabel(fieldPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.ckNotifyEmail.label"));
+        lblCkNotifyEmailField.setLayoutData( getBaseFormData(comboRoleField, margin, 0, 0, middle, -margin) );
+        
+        Button ckNotifyEmailField = createCheckbox(fieldPermissionGroup, null);
+        ckNotifyEmailField.setLayoutData( getBaseFormData(comboRoleField, margin, lblCkNotifyEmailField, margin, 100, 0) );
+        
+        Label lblCkCustomMessageField = createLabel(fieldPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.ckCustomMessage"));
+        lblCkCustomMessageField.setLayoutData( getBaseFormData(ckNotifyEmailField, margin, 0, 0, middle, -margin) );
+        
+        Button ckCustomMessageField = createCheckbox(fieldPermissionGroup, null);
+        ckCustomMessageField.setLayoutData( getBaseFormData(ckNotifyEmailField, margin, lblCkCustomMessageField, margin, 60, 0) );
+        
+        Label lblComboCustomMessageField = createLabel(fieldPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.ckCustomMessage.label"));
+        lblComboCustomMessageField.setLayoutData( getBaseFormData(ckNotifyEmailField, margin, 0, 0, middle + 2 * (100 - middle) / 3, -margin) );
+        
+        CCombo comboCustomMessageField = createFieldsCombo(fieldPermissionGroup);
+        comboCustomMessageField.setLayoutData( getBaseFormData(ckNotifyEmailField, margin, lblComboCustomMessageField, margin, 100, margin) );
+        
+        // Any Permission Group
+        
+        Group anyPermissionGroup = createGroup(permissionComposite, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.anyPermission.groupLabel"));
+        anyPermissionGroup.setLayout( getFormLayout(10) );
+        
+        Label lblCkAnyPermission = createLabel(anyPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.anyPermission.label"));
+        lblCkAnyPermission.setLayoutData( getBaseFormData(0, margin, 0, 0, middle, -margin) );
+        
+        Button ckAnyPermission = createCheckbox(anyPermissionGroup, null);
+        ckAnyPermission.setLayoutData( getBaseFormData(0, margin, lblCkAnyPermission, margin, 60, 0) );
+        
+        Label lblComboAnyPermissionRole = createLabel(anyPermissionGroup, BaseMessages.getString(PKG, "DriveCopyStepDialog.permissionsTab.roleCombo.label"));
+        lblComboAnyPermissionRole.setLayoutData( getBaseFormData(0, margin, 0, 0, middle + 2 * (100 - middle) / 3, -margin) );
+        
+        CCombo comboAnyPermissionRole = createRoleCombo(anyPermissionGroup);
+        comboAnyPermissionRole.setLayoutData( getBaseFormData(0, margin, lblComboAnyPermissionRole, margin, 100, margin) );
         
         
         
@@ -313,8 +358,11 @@ public class DriveCopyStepDialog extends BasicStepDialog {
         fileConfigGroup.setLayoutData( getBaseFormData(serviceAccountGroup, margin, 0, margin, 100, -margin) );
         impersonateGroup.setLayoutData( getBaseFormData(fileConfigGroup, margin, 0, margin, 100, -margin) );
         
-        
-        inputPermissionGroup.setLayoutData( getBaseFormData(txtOutputField, margin, 0, margin, 100, -margin));
+        FormData fdInputPermissionGroup = getBaseFormData(txtOutputField, margin, 0, margin, 100, -margin);
+        fdInputPermissionGroup.bottom = new FormAttachment(60, 0);
+        inputPermissionGroup.setLayoutData( fdInputPermissionGroup );
+        fieldPermissionGroup.setLayoutData( getBaseFormData(inputPermissionGroup, margin, 0, margin, 100, -margin));
+        anyPermissionGroup.setLayoutData( getBaseFormData(fieldPermissionGroup, margin, 0, margin, 100, -margin) );
 		
         // Ok and Cancel buttons
 		
@@ -330,6 +378,12 @@ public class DriveCopyStepDialog extends BasicStepDialog {
 	@Override
 	protected Button createHelpButton(Shell shell, StepMeta stepMeta, PluginInterface plugin){
 		return null;
+	}
+	
+	private CCombo createRoleCombo(Composite composite){
+		CCombo roleCombo = new CCombo(composite, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
+        props.setLook(roleCombo);
+        return roleCombo;
 	}
 	
 	

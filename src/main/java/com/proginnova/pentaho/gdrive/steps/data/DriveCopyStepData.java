@@ -4,7 +4,7 @@ import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepData;
 import org.pentaho.di.trans.step.StepDataInterface;
 
-import com.proginnova.pentaho.gdrive.impl.DriveRolePermission;
+import com.proginnova.gdrive.impl.DriveRolePermission;
 
 public class DriveCopyStepData extends BaseStepData implements StepDataInterface {
 

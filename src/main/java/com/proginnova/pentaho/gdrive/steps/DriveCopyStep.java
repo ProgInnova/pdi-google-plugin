@@ -18,10 +18,10 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.oauth2.Oauth2Scopes;
-import com.proginnova.pentaho.gdrive.impl.DriveFileManagement;
-import com.proginnova.pentaho.gdrive.impl.DriveFileMimeTypes;
-import com.proginnova.pentaho.gdrive.impl.DriveRolePermission;
-import com.proginnova.pentaho.gdrive.impl.GoogleConnection;
+import com.proginnova.gdrive.impl.DriveFileManagement;
+import com.proginnova.gdrive.impl.DriveFileMimeTypes;
+import com.proginnova.gdrive.impl.DriveRolePermission;
+import com.proginnova.gdrive.impl.GoogleConnection;
 import com.proginnova.pentaho.gdrive.steps.data.DriveCopyStepData;
 import com.proginnova.pentaho.gdrive.steps.meta.DriveCopyStepMeta;
 

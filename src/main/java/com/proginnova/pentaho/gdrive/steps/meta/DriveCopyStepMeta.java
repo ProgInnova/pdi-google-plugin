@@ -38,7 +38,7 @@ import com.proginnova.pentaho.gdrive.steps.ui.DriveCopyStepDialog;
 	name = "DriveCopyStep.Name", 
 	description = "DriveCopyStep.TooltipDesc", 
 	image = "drivecopy.svg", 
-	categoryDescription="i18n:org.pentaho.di.trans.step:BaseStep.Category.Utility", 
+	categoryDescription="DriveSteps.Category", 
 	i18nPackageName = "com.proginnova.pentaho.gdrive.steps.meta", 
 	documentationUrl = "DriveCopyStep.DocumentationURL", 
 	casesUrl = "DriveCopyStep.CasesURL", 

@@ -1,4 +1,4 @@
-package com.proginnova.pentaho.gdrive.impl;
+package com.proginnova.gdrive.impl;
 
 public interface DriveFileMimeTypes {
 	public static String FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
