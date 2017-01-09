@@ -3,6 +3,7 @@ package com.proginnova.pentaho.ui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -164,9 +165,12 @@ public abstract class BasicStepDialog extends BaseStepDialog implements StepDial
         return formLayout;
 	}
 	
-	protected Button createButton(Composite composite, String label, Listener listener){
+	protected Button createButton(Composite composite, String label, SelectionListener listener){
 		Button btn = new Button(composite, SWT.PUSH | SWT.CENTER);
 		//btn.addListener(arg0, arg1);(listener);
+		if(listener != null){
+			btn.addSelectionListener(listener);
+		}
 		btn.setText(label);
 		props.setLook(btn);
 		return btn;
@@ -192,8 +196,23 @@ public abstract class BasicStepDialog extends BaseStepDialog implements StepDial
         return ccombo;
 	}
 	
+	protected Button createCheckbox(Composite composite){
+		Button btn = new Button(composite, SWT.CHECK);
+		props.setLook(btn);
+		return btn;
+	}
+	
+	protected Button createCheckbox(Composite composite, SelectionListener listener){
+		Button btn = new Button(composite, SWT.CHECK);
+		props.setLook(btn);
+		if(listener != null){
+			btn.addSelectionListener(listener);
+		}
+		return btn;
+	}
+	
 	protected abstract ShellAdapter getShellAdapter();
 	protected abstract ModifyListener getMetaModifyListener();
-	protected abstract Listener getOkCancelListener();
+	protected abstract SelectionListener getOkCancelListener();
 
 }

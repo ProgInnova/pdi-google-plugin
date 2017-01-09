@@ -179,7 +179,7 @@ public class DriveFileManagement {
 				pageToken = request.getNextPageToken();
 			}while(pageToken != null);
 		}else{
-			return service.files().get(file).setFields(FILE_SET_FIELDS_PARAMETER).execute();
+			return service.files().get(file).setFields("id, name, parents, mimeType, quotaBytesUsed, owners, permissions").execute();
 		}
 		return null;
 	}
@@ -310,4 +310,28 @@ public class DriveFileManagement {
 		return false;
 	}
 	
+	public static List<File> getSharedFiles(Drive service) throws IOException{
+		List<File> files = new LinkedList<>();
+		String pageToken = null;
+		FileList request = null;
+		do{
+			request = service.files().list().setQ("sharedWithMe=true and mimeType!='" + DriveFileMimeTypes.FOLDER_MIME_TYPE + "'").setPageToken(pageToken).setFields(FILE_SET_FIELDS_PARAMETER).execute();
+			files.addAll(request.getFiles());
+			pageToken = request.getNextPageToken();
+		}while(pageToken != null);
+		return files;
+	}
+	
+	
+	public static List<File> getSharedFiles(Drive service, String type) throws IOException{
+		List<File> files = new LinkedList<>();
+		String pageToken = null;
+		FileList request = null;
+		do{
+			request = service.files().list().setQ(String.format("sharedWithMe=true and mimeType='%s'", type)).setPageToken(pageToken).setFields(FILE_SET_FIELDS_PARAMETER).execute();
+			files.addAll(request.getFiles());
+			pageToken = request.getNextPageToken();
+		}while(pageToken != null);
+		return files;
+	}
 }

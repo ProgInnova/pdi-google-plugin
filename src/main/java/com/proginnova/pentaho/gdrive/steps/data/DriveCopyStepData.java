@@ -15,9 +15,8 @@ public class DriveCopyStepData extends BaseStepData implements StepDataInterface
 	public DriveRolePermission inputDriveRole;
 	
 	public boolean fieldCheckedNotifyByEmail, fieldCheckedCustomMessage, fieldChecked;
-	public String fieldCustomMessage;
 	public DriveRolePermission fieldDriveRole;
-	public int fieldEmailAccountIndex;
+	public int fieldEmailAccountIndex, fieldCustomMessageIndex;
 	
 	public boolean anyAccessChecked;
 	public DriveRolePermission anyAccessDriveRole;
@@ -25,6 +24,8 @@ public class DriveCopyStepData extends BaseStepData implements StepDataInterface
 	public int fieldFileTitleIndex;
 	
 	public int numberOfPrevRows;
+	
+	public int newColumnIndex;
 	
 	public DriveCopyStepData(){
 		super();
@@ -43,6 +44,8 @@ public class DriveCopyStepData extends BaseStepData implements StepDataInterface
 		
 		numberOfPrevRows = 0;
 		fieldFileTitleIndex = -1;
+		fieldCustomMessageIndex = -1;
+		newColumnIndex = -1;
 	}
 	
 	

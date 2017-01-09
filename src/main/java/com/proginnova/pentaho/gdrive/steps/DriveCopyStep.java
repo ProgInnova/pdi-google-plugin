@@ -3,8 +3,10 @@ package com.proginnova.pentaho.gdrive.steps;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.jetty.server.nio.NetworkTrafficSelectChannelConnector;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettleStepException;
 import org.pentaho.di.core.row.RowDataUtil;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.Trans;
@@ -56,13 +58,13 @@ public class DriveCopyStep extends BaseStep implements StepInterface {
 				connection = new GoogleConnection(meta.getServiceKeyFile(), meta.getServiceEmail(), scopes);
 			}
 			driveService = connection.getDrive();
-			copyFile = DriveFileManagement.getFile(driveService, meta.getDriveFileToCopy(), false);
-			folderDump = DriveFileManagement.getFile(driveService, DriveFileMimeTypes.FOLDER_MIME_TYPE, meta.getDriveFolderToDump());
+			copyFile = DriveFileManagement.getFile(driveService, meta.getDriveFileToCopy(), true);
+			folderDump = DriveFileManagement.getFile(driveService, meta.getDriveFolderToDump(), true);
 		}catch(Exception ex){
 			ex.printStackTrace();
 			return false;
 		}
-		return driveService != null && copyFile != null && folderDump != null;
+		return driveService != null && copyFile != null && folderDump != null && folderDump.getMimeType().equals(DriveFileMimeTypes.FOLDER_MIME_TYPE);
 	}
 	
 	@Override
@@ -83,8 +85,11 @@ public class DriveCopyStep extends BaseStep implements StepInterface {
 			data.numberOfPrevRows = getInputRowMeta().size();
 			data.outputRowMeta = getInputRowMeta().clone();
 			meta.getFields(data.outputRowMeta, getStepname(), null, null, this, repository, metaStore);
-			data.fieldFileTitleIndex = meta.getTitleSelectedIndex();
-			
+			data.fieldFileTitleIndex = data.outputRowMeta.indexOfValue(meta.getTitleFieldSelected());
+			data.newColumnIndex = data.outputRowMeta.indexOfValue(meta.getOutputField());
+			if(data.newColumnIndex < 0){
+				throw new KettleStepException("Not valid field");
+			}
 			if(meta.isCheckedInputAccess()){
 				data.inputChecked = true;
 				data.inputEmailAccount = meta.getInputEmailAccount();
@@ -94,58 +99,66 @@ public class DriveCopyStep extends BaseStep implements StepInterface {
 				}else if(meta.isInputCheckedNotifyEmail()){
 					data.inputCheckedNotifyByEmail = true;
 				}
+				data.inputDriveRole = DriveRolePermission.valueOf(meta.getInputRole().toLowerCase());
 			}
 			
 			if(meta.isCheckedFieldAccess()){
-				data.inputChecked = true;
-				data.fieldEmailAccountIndex = meta.getFieldSelectedIndex();
+				data.fieldChecked = true;
+				data.fieldEmailAccountIndex = data.outputRowMeta.indexOfValue(meta.getFieldAccount());
+				if(data.fieldEmailAccountIndex < 0){
+					throw new KettleStepException("Required field");
+				}
 				if(meta.isFieldCheckedNotifyEmail() && meta.isFieldCheckedNotifyEmail()){
 					data.fieldCheckedNotifyByEmail = data.fieldCheckedCustomMessage = true;
-					data.fieldCustomMessage = meta.getFieldCustomMessage();
+					data.fieldCustomMessageIndex = data.outputRowMeta.indexOfValue(meta.getFieldCustomMessage());
 				}else if(meta.isFieldCheckedNotifyEmail()){
 					data.inputCheckedNotifyByEmail = true;
 				}
+				data.fieldDriveRole = DriveRolePermission.valueOf(meta.getFieldRole().toLowerCase());
 			}
 			
 			if(meta.isCheckedAnyAccess()){
 				data.anyAccessChecked = meta.isCheckedAnyAccess();
-				if(meta.getAnyoneRole().equals(DriveRolePermission.owner)){
+				if(meta.getAnyoneRole().toLowerCase().equals(DriveRolePermission.owner)){
 					throw new KettleException(BaseMessages.getString(PKG, "DriveCopyStep.Exception.AnyoneOwnerNotAllowed"));
 				}
-				data.anyAccessDriveRole = DriveRolePermission.valueOf(meta.getAnyoneRole());
+				data.anyAccessDriveRole = DriveRolePermission.valueOf(meta.getAnyoneRole().toLowerCase());
 			}
 			
 		}
-		
-		String copiedFileName = "";
-		String inputEmail = "";
-		String fieldEmail = "";
-		
+
 		try {
-			File copiedFile = DriveFileManagement.copyFiles(driveService, copyFile, folderDump, copiedFileName);
 			Object[] outputRow = RowDataUtil.createResizedCopy(row, data.outputRowMeta.size());
-			int newColumnIndex = outputRow.length;
+			File copiedFile = DriveFileManagement.copyFiles(driveService, copyFile, folderDump, (String) outputRow[data.fieldFileTitleIndex]);;
+			if(log.isDebug()){
+				log.logDebug("COPIED FILEID: " + copiedFile.getId());
+			}
 			if(data.anyAccessChecked){
 				DriveFileManagement.addAnyoneAccess(driveService, copiedFile, data.anyAccessDriveRole);
 			}
 			
 			if(data.inputChecked){
 				if(data.inputCheckedNotifyByEmail && data.inputCheckedNotifyByEmail){
-					DriveFileManagement.addUserPermission(driveService, copiedFile, inputEmail, data.inputDriveRole, data.inputCustomMessage);
+					DriveFileManagement.addUserPermission(driveService, copiedFile, data.inputEmailAccount, data.inputDriveRole, data.inputCustomMessage);
 				}else{
-					DriveFileManagement.addUserPermission(driveService, copiedFile, inputEmail, data.inputDriveRole, data.inputCheckedNotifyByEmail);
+					DriveFileManagement.addUserPermission(driveService, copiedFile, data.inputEmailAccount, data.inputDriveRole, data.inputCheckedNotifyByEmail);
 				}
 			}
 			
 			if(data.fieldChecked){
+				if(log.isDebug()){
+					log.logDebug("Adding sharing with: " + (String)outputRow[data.fieldEmailAccountIndex]);
+				}
+				
+				
 				if(data.fieldCheckedNotifyByEmail && data.fieldCheckedNotifyByEmail){
-					DriveFileManagement.addUserPermission(driveService, copiedFile, fieldEmail, data.fieldDriveRole, data.fieldCustomMessage);
+					DriveFileManagement.addUserPermission(driveService, copiedFile, (String)outputRow[data.fieldEmailAccountIndex], data.fieldDriveRole, (String)outputRow[data.fieldCustomMessageIndex]);
 				}else{
-					DriveFileManagement.addUserPermission(driveService, copiedFile, fieldEmail, data.fieldDriveRole, data.fieldCheckedNotifyByEmail);
+					DriveFileManagement.addUserPermission(driveService, copiedFile, (String)outputRow[data.fieldEmailAccountIndex], data.fieldDriveRole, data.fieldCheckedNotifyByEmail);
 				}
 			}
-			outputRow[newColumnIndex] = copiedFile.getId();
-			putRow(data.outputRowMeta, row);
+			outputRow[data.newColumnIndex] = copiedFile.getId();
+			putRow(data.outputRowMeta, outputRow);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			logError(BaseMessages.getString(PKG, "DriveCopyStep.Log.StepCanNotContinueForErrors", e.getMessage()));

@@ -15,6 +15,8 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.oauth2.Oauth2;
+import com.google.api.services.oauth2.Oauth2Scopes;
 import com.google.common.io.Files;
 
 public class GoogleConnection {
@@ -23,10 +25,15 @@ public class GoogleConnection {
 	private Collection<String> scopes;
 	
 	public GoogleConnection(String credentialFile, String serviceEmail, Collection<String> scopes) throws Exception{
+		if(!serviceEmail.matches("[a-z-._\\d]*@[a-z-._\\d]+\\.gserviceaccount.com")){
+			throw new Exception("Must use a service account email");
+		}
+		scopes.add(Oauth2Scopes.PLUS_LOGIN);
 		credential = authorize(credentialFile, serviceEmail, scopes);
 		if(credential == null){
 			throw new Exception("Credential not created");
 		}
+		credential.refreshToken();
 		this.scopes = scopes;
 	}
 	
@@ -115,7 +122,8 @@ public class GoogleConnection {
 	}
 	
 	public boolean isConnected(){
-		return credential != null;
+		System.out.println();
+		return credential != null && credential.getAccessToken() != null && !credential.getAccessToken().equals("");
 	}
 	
 	public Drive getDrive(){
