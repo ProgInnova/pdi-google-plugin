@@ -1,5 +1,7 @@
 package com.proginnova.pentaho.gdrive.steps.meta;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
@@ -31,6 +33,10 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.metastore.api.IMetaStore;
 import org.w3c.dom.Node;
 
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.DriveScopes;
+import com.proginnova.gdrive.impl.DriveFileManagement;
+import com.proginnova.gdrive.impl.GoogleConnection;
 import com.proginnova.pentaho.gdrive.steps.DriveCopyStep;
 import com.proginnova.pentaho.gdrive.steps.data.DriveCopyStepData;
 import com.proginnova.pentaho.gdrive.steps.ui.DriveCopyStepDialog;
@@ -48,7 +54,7 @@ import com.proginnova.pentaho.gdrive.steps.ui.DriveCopyStepDialog;
 )
 public class DriveCopyStepMeta extends BaseStepMeta implements StepMetaInterface {
 	
-	private static final Class<?> PKG = DriveCopyStepData.class;
+	private static final Class<?> PKG = DriveCopyStepMeta.class;
 
 	private String titleFieldSelected, outputField;
 	
@@ -158,13 +164,67 @@ public class DriveCopyStepMeta extends BaseStepMeta implements StepMetaInterface
 			String[] input, String[] output, RowMetaInterface info, VariableSpace space, Repository repository,
 			IMetaStore metaStore) {
 		// TODO Auto-generated method stub
-		CheckResult cr = null;
+		boolean success = true;
 		if(input != null && input.length > 0){
-			cr = new CheckResult(CheckResult.TYPE_RESULT_OK, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.ReceivingRows.OK"), stepMeta);
+			remarks.add(new CheckResult(CheckResult.TYPE_RESULT_OK, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.ReceivingRows.OK"), stepMeta));
 		}else{
-			cr = new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.ReceivingRows.ERROR"), stepMeta);
+			remarks.add(new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.ReceivingRows.ERROR"), stepMeta));
 		}
-		remarks.add(cr);
+		
+		if(!serviceEmail.isEmpty() && !serviceKeyFile.isEmpty()){
+			try{
+				Collection<String> scopes = new LinkedList<>();
+				scopes.add(DriveScopes.DRIVE);
+				GoogleConnection con = new GoogleConnection(serviceKeyFile, serviceEmail, scopes);
+				if(con.isConnected()){
+					remarks.add(new CheckResult(CheckResult.TYPE_RESULT_OK, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.ServiceConfigured.OK"), stepMeta));
+				}else{
+					remarks.add(new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.ServiceConfigured.ERROR"), stepMeta));
+					success = false;
+				}
+				
+				if(!driveFileToCopy.isEmpty()){
+					remarks.add(new CheckResult(CheckResult.TYPE_RESULT_OK, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.FileCopySetted.OK"), stepMeta));
+				}else{
+					remarks.add(new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.FileCopySetted.ERROR"), stepMeta));
+					success = false;
+				}
+				
+				if(!driveFolderToDump.isEmpty()){
+					remarks.add(new CheckResult(CheckResult.TYPE_RESULT_OK, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.FolderDumpSetted.OK"), stepMeta));
+				}else{
+					remarks.add(new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.FolderDumpSetted.ERROR"), stepMeta));
+					success = false;
+				}
+				
+				if(con.isConnected() && !driveFileToCopy.isEmpty() && !driveFolderToDump.isEmpty()){
+					Drive service = con.getDrive();
+					if(service.files().get(driveFileToCopy).setFields("id").execute() != null){
+						remarks.add(new CheckResult(CheckResult.TYPE_RESULT_OK, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.FileCopyExists.OK"), stepMeta));
+					}else{
+						remarks.add(new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.FileCopyExists.ERROR"), stepMeta));
+						success = false;
+					}
+					
+					if(service.files().get(driveFolderToDump).setFields("id").execute() != null){
+						remarks.add(new CheckResult(CheckResult.TYPE_RESULT_OK, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.FolderDumpExists.OK"), stepMeta));
+					}else{
+						remarks.add(new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.FolderDumpExists.ERROR"), stepMeta));
+						success = false;
+					}
+				}
+				
+				if(success){
+					remarks.add(new CheckResult(CheckResult.TYPE_RESULT_OK, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.StepConfigured.OK"), stepMeta));
+				}else{
+					remarks.add(new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.StepConfigured.ERROR"), stepMeta));
+				}
+			}catch(Exception ex){
+				remarks.add(new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.StepConfigured.ERROR"), stepMeta));
+			}
+		}else{
+			remarks.add(new CheckResult(CheckResult.TYPE_RESULT_ERROR, BaseMessages.getString(PKG, "DriveCopyStep.CheckResult.ServiceNotConfigured"), stepMeta));
+		}
 		super.check(remarks, transMeta, stepMeta, prev, input, output, info, space, repository, metaStore);
 		
 	}
@@ -247,7 +307,7 @@ public class DriveCopyStepMeta extends BaseStepMeta implements StepMetaInterface
 	@Override
 	public void loadXML(Node stepnode, List<DatabaseMeta> databases, IMetaStore metaStore) throws KettleXMLException {
 		// TODO Auto-generated method stub
-		System.out.println("LOADING DATA FROM XML");
+		
 		String def = "";
 		try{
 			this.serviceEmail = Const.NVL(XMLHandler.getTagValue(stepnode, "serviceEmail"), def);
@@ -258,9 +318,9 @@ public class DriveCopyStepMeta extends BaseStepMeta implements StepMetaInterface
 			
 			this.checkedInputAccess = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "checkedInputAccess"));
 			this.inputEmailAccount = Const.NVL(XMLHandler.getTagValue(stepnode, "inputEmailAccount"), def);
-			System.out.println("VALUE CHECKED: " + XMLHandler.getTagValue(stepnode, "inputCheckedNotifyEmail"));
+			
 			this.inputCheckedNotifyEmail = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "inputCheckedNotifyEmail"));
-			System.out.println("VALUE PARSED: " + inputCheckedNotifyEmail);
+			
 			this.inputCheckedCustomEmail = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "inputCheckedCustomEmail"));
 			this.checkedInputAccess = "Y".equalsIgnoreCase(XMLHandler.getTagValue(stepnode, "checkedInputAccess"));
 			this.inputCustomMessage = Const.NVL(XMLHandler.getTagValue(stepnode, "inputCustomMessage"), def);
@@ -329,7 +389,7 @@ public class DriveCopyStepMeta extends BaseStepMeta implements StepMetaInterface
 		vmi.setOrigin(name);
 		
 		inputRowMeta.addValueMeta(vmi);
-		System.out.println("INPUTROWMETA SIZE IN GET FIELDS: " + inputRowMeta.size());
+		
 	}
 
 	public String getTitleFieldSelected() {

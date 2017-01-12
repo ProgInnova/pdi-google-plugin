@@ -239,7 +239,7 @@ public class DriveFileManagement {
 			buildRequest.setTransferOwnership(true);
 		}
 		Permission createdPermission = buildRequest.execute();
-		System.out.println(createdPermission);
+		
 		return createdPermission.getId() != null && createdPermission.getRole().equals(rolePermission.toString());
 	}
 	
@@ -253,7 +253,7 @@ public class DriveFileManagement {
 			buildRequest.setTransferOwnership(true);
 		}
 		Permission createdPermission = buildRequest.execute();
-		System.out.println(createdPermission);
+		
 		return createdPermission.getId() != null && createdPermission.getRole().equals(rolePermission.toString());
 	}
 	
@@ -267,7 +267,7 @@ public class DriveFileManagement {
 			buildRequest.setTransferOwnership(true);
 		}
 		Permission createdPermission = buildRequest.execute();
-		System.out.println(createdPermission);
+		
 		return createdPermission.getId() != null && createdPermission.getRole().equals(rolePermission.toString());
 	}
 	
@@ -301,7 +301,7 @@ public class DriveFileManagement {
 		FileList request = null;
 		do{
 			request = service.files().list().setQ(String.format("mimeType='%s' and '%s' in parents", DriveFileMimeTypes.FOLDER_MIME_TYPE, folderParent)).setPageToken(pageToken).setFields(FILE_SET_FIELDS_PARAMETER).execute();
-			System.out.println(request.getFiles());
+			
 			for(File file: request.getFiles()){
 				service.files().delete(file.getId()).execute();
 			}

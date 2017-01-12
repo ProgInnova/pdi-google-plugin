@@ -130,8 +130,8 @@ public class DriveCopyStepDialog extends BasicStepDialog {
 			wStepname.setText(stepname);
 		}
 		titleFieldSelect.setText(Const.NVL(driveCopyMeta.getTitleFieldSelected(), ""));
-		System.out.println("META VALUES: " + driveCopyMeta);
-		System.out.println("OUTPUT FIELD: " + driveCopyMeta.getOutputField());
+		
+		
 		txtOutputField.setText(driveCopyMeta.getOutputField());
 		
 		txtSvAccountEmail.setText(Const.NVL(driveCopyMeta.getServiceEmail(), ""));
@@ -430,12 +430,9 @@ public class DriveCopyStepDialog extends BasicStepDialog {
 		ckInputPermission.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				if (!ckInputPermission.getSelection() && ckNotifyEmailInput.getSelection()) {
-					ckNotifyEmailInput.setSelection(false);
-					ckNotifyEmailInput.setEnabled(false);
-				}
 
-				if (!ckInputPermission.getSelection() && ckCustomMessageInput.getSelection()) {
+				if (!ckInputPermission.getSelection() && ckCustomMessageInput.isEnabled()) {
+					ckNotifyEmailInput.setSelection(false);
 					ckCustomMessageInput.setSelection(false);
 					ckCustomMessageInput.setEnabled(false);
 					txtCustomMessage.setEnabled(false);
@@ -509,12 +506,9 @@ public class DriveCopyStepDialog extends BasicStepDialog {
 		ckPermissionField.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				if (!ckPermissionField.getSelection() && ckNotifyEmailField.isEnabled()) {
-					ckNotifyEmailField.setEnabled(false);
-					ckNotifyEmailField.setSelection(false);
-				}
 
-				if (!ckPermissionField.getSelection() && ckCustomMessageField.getSelection()) {
+				if (!ckPermissionField.getSelection() && ckCustomMessageField.isEnabled()) {
+					ckNotifyEmailField.setSelection(false);
 					ckCustomMessageField.setEnabled(false);
 					ckCustomMessageField.setSelection(false);
 					comboCustomMessageField.setEnabled(false);

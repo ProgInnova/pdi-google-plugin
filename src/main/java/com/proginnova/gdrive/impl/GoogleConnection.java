@@ -122,7 +122,7 @@ public class GoogleConnection {
 	}
 	
 	public boolean isConnected(){
-		System.out.println();
+		
 		return credential != null && credential.getAccessToken() != null && !credential.getAccessToken().equals("");
 	}
 	
