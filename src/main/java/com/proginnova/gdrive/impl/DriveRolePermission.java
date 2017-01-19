@@ -2,7 +2,7 @@ package com.proginnova.gdrive.impl;
 
 public enum DriveRolePermission {
 	owner,
-	writter,
+	writer,
 	commenter,
 	reader
 }

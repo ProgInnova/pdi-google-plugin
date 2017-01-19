@@ -628,7 +628,7 @@ public class DriveCopyStepDialog extends BasicStepDialog {
 		roleCombo.add("");
 		roleCombo.add(DriveRolePermission.reader.toString().toUpperCase());
 		roleCombo.add(DriveRolePermission.commenter.toString().toUpperCase());
-		roleCombo.add(DriveRolePermission.writter.toString().toUpperCase());
+		roleCombo.add(DriveRolePermission.writer.toString().toUpperCase());
 		return roleCombo;
 	}
 
