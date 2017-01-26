@@ -59,8 +59,6 @@ import com.proginnova.gdrive.impl.GoogleConnection;
 import com.proginnova.pentaho.gdrive.steps.meta.DriveCopyStepMeta;
 import com.proginnova.pentaho.ui.BasicStepDialog;
 
-import sun.security.pkcs11.wrapper.CK_LOCKMUTEX;
-
 public class DriveCopyStepDialog extends BasicStepDialog {
 
 	private static Class<?> PKG = DriveCopyStepDialog.class;

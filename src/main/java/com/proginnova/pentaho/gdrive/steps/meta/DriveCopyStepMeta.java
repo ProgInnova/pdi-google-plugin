@@ -35,7 +35,6 @@ import org.w3c.dom.Node;
 
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
-import com.proginnova.gdrive.impl.DriveFileManagement;
 import com.proginnova.gdrive.impl.GoogleConnection;
 import com.proginnova.pentaho.gdrive.steps.DriveCopyStep;
 import com.proginnova.pentaho.gdrive.steps.data.DriveCopyStepData;

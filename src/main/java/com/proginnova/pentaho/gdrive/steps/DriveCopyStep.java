@@ -3,7 +3,6 @@ package com.proginnova.pentaho.gdrive.steps;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eclipse.jetty.server.nio.NetworkTrafficSelectChannelConnector;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleStepException;
@@ -16,6 +15,7 @@ import org.pentaho.di.trans.step.StepDataInterface;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
@@ -53,13 +53,16 @@ public class DriveCopyStep extends BaseStep implements StepInterface {
 			if(meta.getImpersonateUser() != null && !meta.getImpersonateUser().isEmpty()){
 				scopes.add(Oauth2Scopes.USERINFO_EMAIL);
 				scopes.add(Oauth2Scopes.USERINFO_PROFILE);
-				connection = new GoogleConnection(meta.getServiceKeyFile(), meta.getServiceEmail(), meta.getImpersonateUser(), scopes);
+				connection = new GoogleConnection(this.environmentSubstitute(meta.getServiceKeyFile()),  this.environmentSubstitute(meta.getServiceEmail()), this.environmentSubstitute(meta.getImpersonateUser()), scopes);
 			}else{
-				connection = new GoogleConnection(meta.getServiceKeyFile(), meta.getServiceEmail(), scopes);
+				connection = new GoogleConnection(this.environmentSubstitute(meta.getServiceKeyFile()), this.environmentSubstitute(meta.getServiceEmail()), scopes);
 			}
 			driveService = connection.getDrive();
 			copyFile = DriveFileManagement.getFile(driveService, meta.getDriveFileToCopy(), true);
 			folderDump = DriveFileManagement.getFile(driveService, meta.getDriveFolderToDump(), true);
+			if(connection.isImpersonate() && !this.environmentSubstitute(meta.getImpersonateUser()).equals(folderDump.getOwners().get(0).getEmailAddress())){
+				throw new Exception("Impersonate it's not the owner of the folder");
+			}
 		}catch(Exception ex){
 			ex.printStackTrace();
 			return false;
@@ -92,10 +95,10 @@ public class DriveCopyStep extends BaseStep implements StepInterface {
 			}
 			if(meta.isCheckedInputAccess()){
 				data.inputChecked = true;
-				data.inputEmailAccount = meta.getInputEmailAccount();
+				data.inputEmailAccount = this.environmentSubstitute(meta.getInputEmailAccount());
 				if(meta.isInputCheckedNotifyEmail() && meta.isInputCheckedNotifyEmail()){
 					data.inputCheckedNotifyByEmail = data.inputCheckedCustomMessage = true;
-					data.inputCustomMessage = meta.getInputCustomMessage();
+					data.inputCustomMessage = this.environmentSubstitute(meta.getInputCustomMessage());
 				}else if(meta.isInputCheckedNotifyEmail()){
 					data.inputCheckedNotifyByEmail = true;
 				}
@@ -179,6 +182,12 @@ public class DriveCopyStep extends BaseStep implements StepInterface {
 		copyFile = null;
 		folderDump = null;
 		super.dispose(smi, sdi);
+	}
+	
+	@Override
+	public String environmentSubstitute(String aString) {
+		// TODO Auto-generated method stub
+		return (aString.startsWith("$"))? super.environmentSubstitute(aString):aString;
 	}
 	
 

@@ -15,7 +15,6 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
-import com.google.api.services.oauth2.Oauth2;
 import com.google.api.services.oauth2.Oauth2Scopes;
 import com.google.common.io.Files;
 
@@ -41,7 +40,12 @@ public class GoogleConnection {
 	// https://developers.google.com/admin-sdk/directory/v1/guides/delegation#create_the_service_account_and_its_credentials
 	// Only for Non gmail domain accounts
 	public GoogleConnection(String credentialFile, String serviceEmail, String impersonateAccount, Collection<String> scopes) throws Exception{
-		credential = authorize(credentialFile, serviceEmail, impersonateAccount ,scopes);
+		if(impersonateAccount == null){
+			throw new NullPointerException("Null Impersonate Account, required value");
+		}else if(impersonateAccount.isEmpty() || impersonateAccount.toLowerCase().endsWith("@gmail.com")){
+			throw new Exception("Invalid impersonate configuration");
+		}
+		credential = authorize(credentialFile, serviceEmail, impersonateAccount, scopes);
 		if(credential == null){
 			throw new Exception("Credential not created");
 		}
@@ -133,5 +137,9 @@ public class GoogleConnection {
 		throw new UnsupportedOperationException("Drive scope not found");
 	}
 	
+	public boolean isImpersonate(){
+		GoogleCredential gCredential = ((GoogleCredential) credential);
+		return gCredential.getServiceAccountUser() != null && !gCredential.getServiceAccountUser().isEmpty();
+	}
 	
 }

@@ -8,8 +8,6 @@ import java.util.List;
 import javax.naming.LimitExceededException;
 
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.Drive.Files;
-import com.google.api.services.drive.Drive.Permissions;
 import com.google.api.services.drive.Drive.Permissions.Create;
 import com.google.api.services.drive.model.About;
 import com.google.api.services.drive.model.File;
@@ -307,7 +305,7 @@ public class DriveFileManagement {
 			}
 			pageToken = request.getNextPageToken();
 		}while(pageToken != null);
-		return false;
+		return true;
 	}
 	
 	public static List<File> getSharedFiles(Drive service) throws IOException{
