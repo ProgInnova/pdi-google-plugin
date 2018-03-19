@@ -16,6 +16,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<kettle-version>7.0.0.1-35</kettle-version>
 		<google.api-version>1.22.0</google.api-version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 
 	<dependencies>
@@ -73,7 +75,7 @@
 	<repositories>
 		<repository>
 			<id>pentaho-releases</id>
-			<url>http://repository.pentaho.org/artifactory/repo/</url>
+			<url>https://nexus.pentaho.org/content/groups/omni/</url>
 		</repository>
 	</repositories>
 
