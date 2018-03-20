@@ -823,7 +823,7 @@ public class DriveCopyStepDialog extends BasicStepDialog {
 						if (r != null && r.getFieldNames().length > 0) {
 							combo.setItems(r.getFieldNames());
 						} else {
-							throw new KettleStepException("Required at least 1 field");
+							throw new KettleStepException( BaseMessages.getString(PKG, "DriveCopyStepDialog.error.fieldCombo.required"));
 						}
 
 						if (fieldValue != null) {
@@ -834,6 +834,7 @@ public class DriveCopyStepDialog extends BasicStepDialog {
 						new ErrorDialog(shell,
 								BaseMessages.getString(PKG, "DriveCopyStepDialog.error.fieldCombo.title"),
 								e.getMessage(), e);
+						shell.setFocus();
 					}
 					shell.setCursor(null);
 					busy.dispose();
