@@ -818,7 +818,7 @@ public class DriveCopyStepDialog extends BasicStepDialog {
 					CCombo combo = (CCombo) evt.widget;
 					try {
 						RowMetaInterface r = transMeta.getPrevStepFields(stepname);
-						String fieldValue = titleFieldSelect.getText();
+						String fieldValue = combo.getText();
 
 						if (r != null && r.getFieldNames().length > 0) {
 							combo.setItems(r.getFieldNames());
@@ -826,7 +826,7 @@ public class DriveCopyStepDialog extends BasicStepDialog {
 							throw new KettleStepException( BaseMessages.getString(PKG, "DriveCopyStepDialog.error.fieldCombo.required"));
 						}
 
-						if (fieldValue != null) {
+						if (fieldValue != null && !fieldValue.isEmpty() ) {
 							combo.setText(fieldValue);
 						}
 					} catch (KettleStepException e) {
