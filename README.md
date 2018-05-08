@@ -1,4 +1,4 @@
-# PDI Google Drive Steps plugin #
+# PDI Google Steps plugin #
 
 Development stage
 

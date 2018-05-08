@@ -36,7 +36,7 @@ public abstract class BasicStepDialog extends BaseStepDialog implements StepDial
 		
 		if(label){
 			formData.left = new FormAttachment(0, 0);
-			formData.right = new FormAttachment(middle, -margin);
+			formData.right = new FormAttachment(middle, -5);
 		}else{
 			formData.left = new FormAttachment(middle, 0);
 			formData.right = new FormAttachment(98, 0);
