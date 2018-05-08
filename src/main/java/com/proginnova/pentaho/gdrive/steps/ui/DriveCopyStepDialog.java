@@ -253,7 +253,7 @@ public class DriveCopyStepDialog extends BasicStepDialog {
 
 		Label lblsvAccountEmail = createLabel(serviceAccountGroup,
 				BaseMessages.getString(PKG, "DriveCopyStepDialog.googleConfigTab.serviceAccountGroup.emailLabel"));
-		lblsvAccountEmail.setLayoutData(getBaseFormData(0, ( (Const.isLinux())? marginLabel + 5 : marginLabel) , 0, 0, middle, -margin));
+		lblsvAccountEmail.setLayoutData(getBaseFormData(0, ( (Const.isLinux() || Const.isWindows())? marginLabel + 5 : marginLabel) , 0, 0, middle, -margin));
 		props.setLook(lblsvAccountEmail);
 
 		txtSvAccountEmail = new TextVar(transMeta, serviceAccountGroup, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
