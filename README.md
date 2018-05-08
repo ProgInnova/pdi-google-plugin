@@ -15,7 +15,7 @@ $ mvn package
 
 ### Steps available ###
 
-* [a Copy files in Google Drive ![][1]](mdoc/drivecopystep.md)
+* [Copy files in Google Drive ![][1]](mdoc/drivecopystep.md)
 
 
 [1]:src/main/resources/drivecopy.svg
