@@ -8,9 +8,12 @@ This plugin works with the [OAuth2 service accounts](https://developers.google.c
 ### Building ###
 This plugin is built with Maven
 ```shell
-$ git clone ...
-$ cd ...
+$ git clone https://jsanchez293@bitbucket.org/proginnova-s-a/pdi-google-plugin.git
+$ cd pdi-google-plugin
 $ mvn package
+$ cp target/pdi-google-plugin-0.0.1-SNAPSHOT.zip ${PDI_FOLDER}/plugins/steps
+$ cd ${PDI_FOLDER}/plugins/steps
+$ unzip pdi-google-plugin-0.0.1-SNAPSHOT.zip
 ```
 
 ### Steps available ###
